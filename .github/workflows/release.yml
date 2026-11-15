@@ -1,0 +1,62 @@
+# Автосборка LangSwitch (Mac). Запускается тегом вида v2.0.1.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # «Что нового» — текст, который ты вводишь в publish.sh (хранится в теге)
+      - name: Release notes
+        id: notes
+        run: |
+          git fetch --force origin "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+          NOTES=$(git for-each-ref "refs/tags/${GITHUB_REF_NAME}" --format='%(contents)')
+          { echo "text<<EOF_NOTES"; echo "$NOTES"; echo "EOF_NOTES"; } >> "$GITHUB_OUTPUT"
+
+      # Постоянный сертификат подписи: macOS считает новую версию «той же программой»
+      # и не сбрасывает разрешение «Универсальный доступ»
+      - name: Import signing certificate
+        env:
+          CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          if [ -z "$CERT_P12" ]; then echo "::error::Нет секрета MACOS_CERT_P12"; exit 1; fi
+          printf "%s" "$CERT_P12" | tr -d ' \r\n\t' | base64 --decode > cert.p12
+          KC=signing.keychain-db
+          security create-keychain -p ci "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p ci "$KC"
+          security import cert.p12 -k "$KC" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          security default-keychain -s "$KC"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ci "$KC"
+          security find-certificate -c "Shepot Self-Signed" -p "$KC" > cert.pem
+          sudo security add-trusted-cert -d -r trustRoot -p codeSign -k /Library/Keychains/System.keychain cert.pem
+          rm -f cert.p12 cert.pem
+
+      - name: Build
+        env:
+          SIGN_IDENTITY: Shepot Self-Signed
+        run: |
+          bash build.sh
+          ditto -c -k --keepParent build/LangSwitch.app build/LangSwitch.zip
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: LangSwitch ${{ github.ref_name }}
+          files: build/LangSwitch.zip
+          body: |
+            ### Что нового
+            ${{ steps.notes.outputs.text }}
+
+            **Установка / обновление одной строкой** (Mac, macOS 13+) — открой Терминал и вставь:
+            `curl -fsSL https://raw.githubusercontent.com/PavelB-22/langswitch/main/install.sh | bash`

@@ -1,0 +1,11 @@
+# Tasks 002
+- [x] T101 Settings.swift — настройки и значения по умолчанию
+- [x] T102 [US5] Corrector.swift — проверка раскладки по словарю
+- [x] T103 [US5] KeyMonitor: перехват пробела, счётчик нажатий, интервал из настроек
+- [x] T104 [US5] TextFixer.replace + откат двойным Shift — AppDelegate
+- [x] T105 [P] [US6] Corrector: исправление регистра
+- [x] T106 [P] [US7] Corrector: опечатки
+- [x] T107 [US8] SettingsView.swift — окно с вкладками
+- [x] T108 [US8] Меню «Настройки…», «Включено» из настроек — AppDelegate
+- [x] T109 build.sh: SwiftUI
+- [ ] T110 Проверка на Маке (Converge)
