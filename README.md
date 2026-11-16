@@ -1,4 +1,4 @@
-# LangSwitch — бесплатный переключатель раскладки для Mac
+# LangSwitch — бесплатный переключатель раскладки для Mac и Windows
 
 Бесплатная замена платным переключателям раскладки (Caramba Switcher, Punto Switcher).
 
@@ -10,7 +10,7 @@
 - Окно настроек: всё включается и выключается.
 - Ничего не отправляет в интернет и не сохраняет то, что ты печатаешь.
 
-## Установка (macOS 13+)
+## Установка на Mac (macOS 13+)
 Открой Терминал и вставь:
 ```
 curl -fsSL https://raw.githubusercontent.com/PavelB-22/langswitch/main/install.sh | bash
@@ -20,7 +20,19 @@ curl -fsSL https://raw.githubusercontent.com/PavelB-22/langswitch/main/install.s
 
 Не видно значка RU/EN в строке меню (спрятался за «чёлкой»)? Запусти LangSwitch ещё раз через Spotlight — откроются настройки.
 
+## Установка на Windows 10/11
+Нажми Win, набери **PowerShell**, открой и вставь:
+```
+irm https://raw.githubusercontent.com/PavelB-22/langswitch/main/install.ps1 | iex
+```
+Права администратора не нужны. Значок RU/EN появится у часов (если не видно — нажми стрелочку ^ рядом с часами).
+Настройки — клик по значку. Обновить — та же команда.
+
 ## Для разработчика
-`bash build.sh install` — собрать и установить локально. `bash publish.sh` — выпустить версию.
+- Mac: `bash build.sh install` — собрать и установить локально.
+- Windows: код в папке `windows/` (C#, .NET Framework 4.8). Проверка логики исправлений: `bash windows/test/run.sh` (нужен mono).
+- `bash publish.sh` — выпустить версию (GitHub сам соберёт Mac и Windows).
+
+Словари для Windows-версии: [FrequencyWords](https://github.com/hermitdave/FrequencyWords) (Hermit Dave), CC BY-SA 4.0.
 
 Новости и другие бесплатные программы — в Telegram-канале «Без подписки»: https://t.me/+CKC03YLzAaU3ZGI6

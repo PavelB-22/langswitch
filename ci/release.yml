@@ -1,4 +1,4 @@
-# Автосборка LangSwitch (Mac). Запускается тегом вида v2.0.1.
+# Автосборка LangSwitch для Mac и Windows. Запускается тегом вида v2.1.0.
 name: Release
 
 on:
@@ -58,5 +58,30 @@ jobs:
             ### Что нового
             ${{ steps.notes.outputs.text }}
 
-            **Установка / обновление одной строкой** (Mac, macOS 13+) — открой Терминал и вставь:
+            **Установка / обновление одной строкой**
+
+            Mac (macOS 13+) — открой Терминал и вставь:
             `curl -fsSL https://raw.githubusercontent.com/PavelB-22/langswitch/main/install.sh | bash`
+
+            Windows 10/11 — открой PowerShell и вставь:
+            `irm https://raw.githubusercontent.com/PavelB-22/langswitch/main/install.ps1 | iex`
+
+  # Windows-версия: собирается после Mac и докладывается в тот же релиз
+  windows:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        shell: bash
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          dotnet build windows/LangSwitch.csproj -c Release -p:Version="$VER" -o out
+          mkdir -p dist
+          cp out/LangSwitch.exe dist/
+          cd dist && 7z a ../LangSwitch-windows.zip LangSwitch.exe
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: LangSwitch-windows.zip
